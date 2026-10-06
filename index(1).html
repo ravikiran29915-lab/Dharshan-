@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROOMMATE HUB</title>
+  <style>
+    *{box-sizing:border-box;font-family:Arial,sans-serif}
+    body{margin:0;min-height:100vh;padding:20px;background:linear-gradient(135deg,#111827,#4c1d95);color:white}
+    .container{max-width:900px;margin:auto}
+    .card{background:rgba(255,255,255,.1);padding:25px;margin-bottom:20px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    h1{text-align:center}
+    input{width:100%;padding:14px;margin:8px 0;border:none;border-radius:10px;outline:none}
+    button{border:none;padding:13px 20px;border-radius:10px;cursor:pointer;font-weight:bold;margin:5px}
+    .login{width:100%;background:#6366f1;color:white}
+    .yes{background:#22c55e;color:white}.no{background:#ef4444;color:white}
+    .logout{background:#374151;color:white;float:right}
+    .member{display:flex;justify-content:space-between;align-items:center;padding:15px;margin:10px 0;border-radius:12px;background:rgba(255,255,255,.08)}
+    .inside{color:#4ade80;font-weight:bold}.outside{color:#f87171;font-weight:bold}
+    .summary{display:flex;gap:15px}.box{flex:1;text-align:center;padding:20px;border-radius:15px;background:rgba(255,255,255,.08)}
+    #dashboard{display:none}#message{text-align:center;margin:10px}
+    @media(max-width:600px){.member{flex-direction:column;align-items:flex-start;gap:10px}.summary{flex-direction:column}}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div id="login" class="card">
+    <h1>🏠 ROOMMATE HUB</h1>
+    <p style="text-align:center;">Room Member Status System</p>
+    <input id="name" type="text" placeholder="Enter your name">
+    <input id="email" type="email" placeholder="Enter your email">
+    <button class="login" onclick="login()">LOGIN</button>
+    <div id="message"></div>
+  </div>
+
+  <div id="dashboard">
+    <div class="card">
+      <button class="logout" onclick="logout()">Logout</button>
+      <h1>🏠 ROOMMATE HUB</h1>
+      <p>Welcome, <strong id="username"></strong></p>
+    </div>
+
+    <div class="card">
+      <h2>My Status</h2>
+      <h3 id="myStatus">Status: -</h3>
+      <button class="yes" onclick="setStatus('YES')">🟢 YES - I'M IN</button>
+      <button class="no" onclick="setStatus('NO')">🔴 NO - I'M OUT</button>
+    </div>
+
+    <div class="card">
+      <h2>Room Summary</h2>
+      <div class="summary">
+        <div class="box"><h2 id="inside">0</h2><p>INSIDE</p></div>
+        <div class="box"><h2 id="outside">0</h2><p>OUTSIDE</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>👥 All Members</h2>
+      <div id="members"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const members=[
+  "Dharshan","Kathirvel","Moulipriyan","Pradeep",
+  "Ravikaran","Madhanesh","Yogeshwaran"
+];
+let currentUser="";
+
+function login(){
+  const name=document.getElementById("name").value.trim();
+  const email=document.getElementById("email").value.trim();
+
+  if(!name||!email){
+    document.getElementById("message").innerText="Please enter name and email.";
+    return;
+  }
+
+  const validUser=members.find(m=>m.toLowerCase()===name.toLowerCase());
+
+  if(!validUser){
+    document.getElementById("message").innerText="Name not found.";
+    return;
+  }
+
+  currentUser=validUser;
+  document.getElementById("login").style.display="none";
+  document.getElementById("dashboard").style.display="block";
+  document.getElementById("username").innerText=currentUser;
+  loadStatus();
+}
+
+function loadStatus(){
+  const saved=JSON.parse(localStorage.getItem("roomStatus")||"{}");
+  let inside=0,outside=0,html="";
+
+  members.forEach(function(name){
+    const status=saved[name]||"NO";
+    if(status==="YES") inside++; else outside++;
+
+    html+=`
+      <div class="member">
+        <div><strong>${name}</strong></div>
+        <div class="${status==="YES"?"inside":"outside"}">
+          ${status==="YES"?"🟢 INSIDE":"🔴 OUTSIDE"}
+        </div>
+      </div>`;
+  });
+
+  document.getElementById("members").innerHTML=html;
+  document.getElementById("inside").innerText=inside;
+  document.getElementById("outside").innerText=outside;
+  document.getElementById("myStatus").innerText="Status: "+(saved[currentUser]||"NO");
+}
+
+function setStatus(status){
+  const saved=JSON.parse(localStorage.getItem("roomStatus")||"{}");
+  saved[currentUser]=status;
+  localStorage.setItem("roomStatus",JSON.stringify(saved));
+  loadStatus();
+}
+
+function logout(){
+  currentUser="";
+  document.getElementById("dashboard").style.display="none";
+  document.getElementById("login").style.display="block";
+  document.getElementById("name").value="";
+  document.getElementById("email").value="";
+  document.getElementById("message").innerText="";
+}
+</script>
+</body>
+</html>
